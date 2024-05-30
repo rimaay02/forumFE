@@ -7,12 +7,11 @@ import { catchError, tap } from 'rxjs/operators';
     providedIn: 'root'
 })
 export class ForumService {
-    private API_URL :string ;
+    private readonly API_URL = 'http://192.168.0.13:8000';
     private roomDataSubject = new BehaviorSubject<any>(null);
     roomData$ = this.roomDataSubject.asObservable();
 
     constructor(private http: HttpClient) {
-      this.API_URL = `http://${window.location.hostname}:8000`;
     }
 
   async getRooms(): Promise<any> {
