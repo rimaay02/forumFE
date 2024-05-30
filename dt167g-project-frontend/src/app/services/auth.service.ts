@@ -8,7 +8,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 export class AuthService {
 
   // The URL of the locally hosted backend API
-  private readonly API_URL = 'http://localhost:8000';  
+  private readonly API_URL = 'http://192.168.0.13:8000';  
 
   // BehaviorSubject to hold the current login status, initially set to false.
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
