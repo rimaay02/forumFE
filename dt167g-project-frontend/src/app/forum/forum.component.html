@@ -1,0 +1,38 @@
+<div class="forum">
+  <h1>Welcome {{ username }}</h1>
+  <button class="create-topic-button" (click)="openCreateTopicModal()">Create New Topic</button>
+  
+  <div class="search-box">
+    <input type="text" placeholder="Search" [(ngModel)]="searchQuery">
+    <select [(ngModel)]="searchType">
+      <option value="user">User</option>
+      <option value="keyword">Keyword</option>
+    </select>
+    <button (click)="search(searchQuery,searchType)">Search</button>
+    <button (click)="resetSearch()">Reset</button> <!-- Reset button -->  
+  </div>
+ 
+  <div class="forum-rooms">
+    <div class="room" *ngFor="let room of filteredRooms">
+        <h2>{{ room.title }}</h2>
+        <p>{{ room.answersCount }} Answers</p>
+        <a [routerLink]="['/room', room.id]">Go to Room</a>
+    </div>
+  </div>
+</div> 
+
+<!-- Modal for creating a new topic -->
+<div class="modal" [ngClass]="{ 'modal-open': isModalOpen }">
+  <div class="modal-content">
+    <span class="close" (click)="closeCreateTopicModal()">&times;</span>
+    <h2>New Topic</h2>
+    <form (ngSubmit)="onCreateRoom()">
+      <label for="topic">Topic:</label>
+      <input type="text" id="topic" name="topic" [(ngModel)]="title">
+      <label for="message">Message:</label>
+      <textarea id="message" name="message" [(ngModel)]="message"></textarea>
+      <button type="submit">Post</button>
+    </form>
+  </div>
+</div>
+

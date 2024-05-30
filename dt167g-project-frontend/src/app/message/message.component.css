@@ -1,0 +1,46 @@
+/* Message container */
+dialog.message-box {
+    display: block; 
+    position: fixed; 
+    top: 50%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+    max-width: 25vw; 
+    width: auto; 
+    padding: 15px;
+    border-radius: 4px;
+    z-index: 1000;
+    text-align: center;
+    font-size: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    pointer-events: auto;
+}
+
+.message-box {
+    margin: 0 auto;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.success {
+    background-color: #28a745;
+    border: 1px solid #28a745;
+    color: white;
+}
+
+.error {
+    background-color: #dc3545;
+    border: 1px solid #dc3545;
+    color: white;
+}
+
+.close-icon {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #f5f5f5;
+}

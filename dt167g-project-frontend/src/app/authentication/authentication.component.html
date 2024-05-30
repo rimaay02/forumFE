@@ -1,0 +1,33 @@
+<!-- A welcoming message -->
+<div class="welcome-header">
+    <h1>Welcome to ProCoders!</h1>
+    <p>Register or Login and start sharing your programming knowledge and experiences.</p>
+</div>
+
+<!-- The main container for authentication forms -->
+<main class="auth-wrapper">
+    <div class="auth-container">
+        <div class="auth-form">
+            <h2>Login</h2>
+            <form #loginForm="ngForm" (submit)="onLogin()">
+                <input type="text" placeholder="Username" [(ngModel)]="usernameLog" name="username" required>
+                <input type="password" placeholder="Password" [(ngModel)]="passwordLog" name="password" required>
+                <button type="submit" [disabled]="!isLoginFormValid()">Login</button>
+            </form>
+        </div>
+
+        <div class="form-separator">Or</div>
+
+        <div class="auth-form">
+            <h2>Register</h2>
+            <form #registerForm="ngForm" (submit)="onRegister()">
+                <input type="text" placeholder="First Name" [(ngModel)]="firstName" name="firstName" required>
+                <input type="text" placeholder="Last Name" [(ngModel)]="lastName" name="lastName" required>
+                <input type="text" placeholder="Username" [(ngModel)]="usernameReg" name="username" required>
+                <input type="password" placeholder="Password" [(ngModel)]="passwordReg" name="password" required>
+                <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+                <button type="submit" [disabled]="!isRegisterFormValid()">Register</button>
+            </form>
+        </div>
+    </div>
+</main>

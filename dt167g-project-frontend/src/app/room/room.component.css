@@ -1,0 +1,9 @@
+.answer-box {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .answer-box textarea {
+    margin-bottom: 10px; /* Add some space between textarea and button */
+  }
+  

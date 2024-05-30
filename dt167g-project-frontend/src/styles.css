@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css?family=Fira+Code|Simonetta:400,400italic');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap');
+
+/* Global Styles */
+body {
+    max-width: 980px;
+    margin: 0 auto;
+    height: 100%;
+    padding: 20px;
+    background: #000; 
+    color: #f5f5f5; 
+    font-family: 'Fira Code', monospace;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-family: 'Fira Code', monospace;
+    color: #f5f5f5; 
+    font-size: 28px;
+    margin: 0;
+    border-radius: 10px;
+}
+
+header h1 strong {
+    font-size: 32px;
+    color: #f5f5f5; 
+}
+
+header h1 span {
+    font-size: 16px;
+    color: #6c757d; 
+    display: block;
+}
+
+header h1 a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Navigation Bar */
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px; 
+}
+
+nav li {
+    transition: all 0.3s ease;
+}
+
+nav a {
+    text-decoration: none;
+    color: #ffffff; 
+    font-size: 18px;
+    font-family: 'Fira Code', monospace;
+    padding: 10px 15px; 
+    border-radius: 5px; 
+    background-color: #1c1c1e; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+nav a:hover {
+    color: #e67e22;
+    background-color: #333;
+    cursor: pointer;
+}
+
+nav ul li a.active {
+    color: #e67e22;
+    font-weight: bold;
+}
+
+/* Footer Styles */
+footer {
+    margin-top: 0px;
+}
+
+.footer-content {
+    text-align: center;
+    padding: 10px;
+    border-top: 1px solid #333;
+}
+
+.footer-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-nav li {
+    display: inline;
+    margin: 0 10px;
+}
+
+.footer-text {
+    margin-top: 10px;
+    color: #6c757d;
+}
