@@ -1,6 +1,8 @@
 <div class="forum">
-  <h1>Welcome {{ username }}</h1>
-  <button class="create-topic-button" (click)="openCreateTopicModal()">Create New Topic</button>
+  <header>
+    <h1>Welcome <strong>{{ username }}</strong></h1>
+    <button class="create-topic-button" (click)="openCreateTopicModal()">Create New Topic</button>
+  </header>
   
   <div class="search-box">
     <input type="text" placeholder="Search" [(ngModel)]="searchQuery">
@@ -8,8 +10,8 @@
       <option value="user">User</option>
       <option value="keyword">Keyword</option>
     </select>
-    <button (click)="search(searchQuery,searchType)">Search</button>
-    <button (click)="resetSearch()">Reset</button> <!-- Reset button -->  
+    <button (click)="search(searchQuery, searchType)">Search</button>
+    <button (click)="resetSearch()">Reset</button>
   </div>
  
   <div class="forum-rooms">
@@ -26,13 +28,12 @@
   <div class="modal-content">
     <span class="close" (click)="closeCreateTopicModal()">&times;</span>
     <h2>New Topic</h2>
-    <form (ngSubmit)="onCreateRoom()">
+    <form #createTopicForm="ngForm" (ngSubmit)="onCreateRoom(createTopicForm)">
       <label for="topic">Topic:</label>
-      <input type="text" id="topic" name="topic" [(ngModel)]="title">
+      <input type="text" id="topic" name="topic" [(ngModel)]="title" required>
       <label for="message">Message:</label>
-      <textarea id="message" name="message" [(ngModel)]="message"></textarea>
-      <button type="submit">Post</button>
+      <textarea id="message" name="message" [(ngModel)]="message" required></textarea>
+      <button type="submit" [disabled]="createTopicForm.invalid">Post</button>
     </form>
   </div>
 </div>
-

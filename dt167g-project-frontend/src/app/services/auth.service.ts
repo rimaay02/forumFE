@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { MessageService } from '../services/message.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +10,8 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 export class AuthService {
 
   // The URL of the locally hosted backend API
-  private readonly API_URL = 'http://192.168.0.13:8000';  
-
+  private readonly API_PORT = '8000';
+  private readonly API_URL = `http://${window.location.hostname}:${this.API_PORT}`;
   // BehaviorSubject to hold the current login status, initially set to false.
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
 
@@ -17,15 +19,22 @@ export class AuthService {
   private currentUsernameSubject = new BehaviorSubject<string | null>(null);
 
   private currentUserIdSubject = new BehaviorSubject<number | null>(null);
-
-
+ 
+  // Variable to store session timeout ID
+  private sessionTimeout: any;
 
   /**
    * Constructs the AuthService and injects dependencies.
    * @param http HttpClient for making HTTP requests.
    */
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient, 
+    private router: Router,
+    private messageService: MessageService
+  ) {
     this.updateSessionData();
+        console.log('API URL:', this.API_URL);
+
   }
 
   /**
@@ -56,7 +65,7 @@ export class AuthService {
     console.log('Attempting login with credentials:', credentials);
     const response = await firstValueFrom(this.http.post<any>(`${this.API_URL}/login`, credentials, { withCredentials: true }));
     console.log('Login response:', response);
-    this.updateSessionState(response.isLoggedIn, response.username, response.userId);
+    this.updateSessionState(response.isLoggedIn, response.username, response.userId, response.sessionTimeout);
     return response;
   }
    
@@ -80,22 +89,20 @@ export class AuthService {
    */
   updateSessionData(): void {
     this.http.get<any>(`${this.API_URL}/session`, { withCredentials: true }).subscribe({
-        next: (response) => {
-          console.log('Session response:', response); // Log the entire response object
-            const { isLoggedIn, username, userId } = response;
-            this.isLoggedInSubject.next(isLoggedIn);
-            this.currentUsernameSubject.next(username);
-            this.currentUserIdSubject.next(userId);
-            console.log('Session updated: ', { isLoggedIn, username, userId });
-
-          },
-        error: (error) => {
-            console.error('Failed to update session data', error);
-            this.isLoggedInSubject.next(false);
-            this.currentUsernameSubject.next(null);
-        }
+      next: (response) => {
+        console.log('Session response:', response); // Log the entire response object
+        const { isLoggedIn, username, userId, sessionTimeout } = response; // Make sure sessionTimeout is included
+        this.updateSessionState(isLoggedIn, username, userId, sessionTimeout);
+        console.log('Session updated: ', { isLoggedIn, username, userId });
+      },
+      error: (error) => {
+        console.error('Failed to update session data', error);
+        this.isLoggedInSubject.next(false);
+        this.currentUsernameSubject.next(null);
+      }
     });
-}
+  }
+  
 
   /**
    * Checks if a user is currently logged in.
@@ -141,10 +148,38 @@ export class AuthService {
    * @param isLoggedIn The user's login status.
    * @param username  The current username or null if not logged in.
    */
-  private updateSessionState(isLoggedIn: boolean, username: string | null, userId:number): void {
+  private updateSessionState(isLoggedIn: boolean, username: string | null, userId: number, sessionTimeout?: number): void {
     console.log('Updating session state to:', isLoggedIn, 'for user:', username);
     this.isLoggedInSubject.next(isLoggedIn);
     this.currentUsernameSubject.next(username);
     this.currentUserIdSubject.next(userId);
-  }  
+    this.clearSessionTimeout();
+
+    if (isLoggedIn && sessionTimeout) {
+      this.setSessionTimeout(sessionTimeout);
+    }
+  }
+
+  /**
+   * Set session timeout
+   * @param timeout Session timeout
+   */
+  private setSessionTimeout(timeout: number): void {
+    this.sessionTimeout = setTimeout(() => {
+      console.log('Session expired. Logging out.');
+      this.messageService.showMessage('Session expired. Please log in again.', false);
+      this.logout();
+      this.router.navigate(['/login']);
+    }, timeout);
+  }
+
+  /**
+   * Clear the session timeout
+   */
+  private clearSessionTimeout(): void {
+    if (this.sessionTimeout) {
+      clearTimeout(this.sessionTimeout);
+      this.sessionTimeout = null;
+    }
+  }
 }

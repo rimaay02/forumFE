@@ -1,3 +1,8 @@
+<!-- Ensure Angular sanitizes the output by using the DomSanitizer service -->
+<div [innerHTML]="sanitizedContent"></div>
+
+<script>alert('This should be blocked by CSP');</script>
+
 <!-- A welcoming message -->
 <div class="welcome-header">
     <h1>Welcome to ProCoders!</h1>
@@ -9,7 +14,7 @@
     <div class="auth-container">
         <div class="auth-form">
             <h2>Login</h2>
-            <form #loginForm="ngForm" (submit)="onLogin()">
+            <form #loginForm="ngForm" (ngSubmit)="onLogin()">
                 <input type="text" placeholder="Username" [(ngModel)]="usernameLog" name="username" required>
                 <input type="password" placeholder="Password" [(ngModel)]="passwordLog" name="password" required>
                 <button type="submit" [disabled]="!isLoginFormValid()">Login</button>
@@ -20,7 +25,7 @@
 
         <div class="auth-form">
             <h2>Register</h2>
-            <form #registerForm="ngForm" (submit)="onRegister()">
+            <form #registerForm="ngForm" (ngSubmit)="onRegister()">
                 <input type="text" placeholder="First Name" [(ngModel)]="firstName" name="firstName" required>
                 <input type="text" placeholder="Last Name" [(ngModel)]="lastName" name="lastName" required>
                 <input type="text" placeholder="Username" [(ngModel)]="usernameReg" name="username" required>

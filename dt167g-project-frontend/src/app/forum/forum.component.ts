@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ForumService } from '../services/forum.service';
@@ -15,8 +15,8 @@ import { MessageService } from '../services/message.service';
     imports: [CommonModule, FormsModule, RouterLink]
 })
 export class ForumComponent implements OnInit {
-    roomId : number = 0;
-    creatorId : number = 0;
+    roomId: number = 0;
+    creatorId: number = 0;
     username: string = '';
     title: string = '';
     message: string = '';
@@ -51,15 +51,25 @@ export class ForumComponent implements OnInit {
         this.message = '';
     }
 
-    async onCreateRoom(): Promise<void> {
+    async onCreateRoom(form: NgForm): Promise<void> {
+        if (form.invalid) {
+            this.messageService.showMessage('Title and message cannot be empty.', false);
+            return;
+        }
 
-        const newRoom = { title: this.title, message: this.message, creatorId : this.creatorId };
+        const existingRoom = this.forumRooms.find(room => room.title.toLowerCase() === this.title.toLowerCase());
+        if (existingRoom) {
+            this.messageService.showMessage('A room with this title already exists. Please choose a different title.', false);
+            return;
+        }
+
+        const newRoom = { title: this.title, message: this.message, creatorId: this.creatorId };
 
         try {
             const response = await this.forumService.createRoom(newRoom);
             this.messageService.showMessage(response.message, true);
             this.closeCreateTopicModal();
-            this.loadRooms(); // Refresh the list of topics
+            this.loadRooms();
         } catch (error: any) {
             const errorMessage = error.error?.message || 'Unknown error occurred';
             this.messageService.showMessage(errorMessage, false);
@@ -83,8 +93,13 @@ export class ForumComponent implements OnInit {
             console.error('Failed to load topics', error);
         }
     }
-    
+
     async search(query: string, type: string): Promise<void> {
+        if (query.trim() === '') {
+            this.messageService.showMessage('Search query cannot be empty.', false);
+            return;
+        }
+
         try {
             const searchResults = await this.forumService.searchRooms(query, type);
             const searchRoomPromises = searchResults.map(async (room: any) => {
@@ -92,9 +107,9 @@ export class ForumComponent implements OnInit {
                 return { ...room, answersCount: answers.length };
             });
             this.filteredRooms = await Promise.all(searchRoomPromises);
-    
+
             console.log('Search Results:', this.filteredRooms);
-            
+
             const numberOfRooms = this.filteredRooms.length;
             const message = numberOfRooms > 0 ? `Found ${numberOfRooms} rooms for '${query}'` : 'No rooms found for the search query.';
             this.messageService.showMessage(message, true);
@@ -102,14 +117,13 @@ export class ForumComponent implements OnInit {
             console.error('Failed to search rooms', error);
         }
     }
-    
-      resetSearch() {
+
+    resetSearch() {
         this.searchQuery = '';
         this.searchType = 'user';
-        this.filteredRooms = this.forumRooms; // Reset to show all rooms
+        this.filteredRooms = this.forumRooms;
         const numberOfRooms = this.filteredRooms.length;
         const message = numberOfRooms > 0 ? `Showing ${numberOfRooms} rooms.` : 'No rooms found.';
         this.messageService.showMessage(message, true);
-      }
-    
+    }
 }

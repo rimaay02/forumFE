@@ -7,7 +7,6 @@ import { AuthService } from '../services/auth.service';
 import { Subscription } from 'rxjs';
 import { MessageService } from '../services/message.service';
 
-
 @Component({
   selector: 'app-room',
   standalone: true,
@@ -22,7 +21,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   userId: number = 0;
   currentUser: any = null; 
   private roomDataSubscription: Subscription | null = null;
-  private userSubscription: Subscription | null = null; // Declare userSubscription
+  private userSubscription: Subscription | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -56,6 +55,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     if (this.roomDataSubscription) {
       this.roomDataSubscription.unsubscribe();
     }
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   async loadRoomData(roomId: string): Promise<void> {
@@ -65,31 +67,38 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     } catch (error) {
       console.error('Failed to load room data', error);
+      this.messageService.showMessage('Failed to load room data.', false);
     }
   }
 
   async loadAnswers(roomId: number): Promise<void> {
     try {
       const answers = await this.forumService.getAnswersByRoomId(roomId.toString());
-      for (let i = 0; i < answers.length; i++) {
-        const answer = answers[i];
-        console.log(answer)
-        let votes = await this.forumService.getVotesByAnswerId(answer.id);
-        
-        for (let i in votes) {
-          answer.votesLength = votes[i].length;
+      for (const answer of answers) {
+        try {
+          const votes = await this.forumService.getVotesByAnswerId(answer.id);
+          answer.votesLength = votes.length;
+          answer.userVote = votes.find(vote => vote.userId === this.userId) || null;
+        } catch (voteError) {
+          console.error(`Failed to load votes for answer ID ${answer.id}`, voteError);
+          answer.votesLength = 0;
+          answer.userVote = null;
         }
       }
       this.roomData.answers = answers;
       this.cdr.detectChanges();
     } catch (error) {
       console.error('Failed to load answers', error);
+      this.messageService.showMessage('Failed to load answers.', false);
     }
   }
 
-
-
   async sendAnswer(): Promise<void> {
+    if (this.newAnswer.trim() === '') {
+      this.messageService.showMessage('Answer cannot be empty.', false);
+      return;
+    }
+
     if (this.roomId && this.newAnswer && this.currentUser) {
       const answer = {
         roomId: this.roomId,
@@ -99,43 +108,66 @@ export class RoomComponent implements OnInit, OnDestroy {
       try {
         await this.forumService.postAnswer(answer);
         this.newAnswer = '';
-        // Reload room data to ensure the new answer with username is fetched
+        this.messageService.showMessage('Answer posted successfully.', true);
         await this.loadRoomData(this.roomId);
         this.cdr.detectChanges(); 
       } catch (error) {
         console.error('Failed to post answer', error);
+        this.messageService.showMessage('Failed to post answer.', false);
       }
     }
   }
+
   async voteUp(answer: any): Promise<void> {
+    if (answer.userVote) {
+      this.messageService.showMessage('You have already voted.', false);
+      return;
+    }
+
     try {
       await this.forumService.insertVote(this.userId, answer.id);
-      // Reload answers to update the votes
-      await this.loadAnswers(this.roomData.id);
+      answer.votesLength += 1;
+      answer.userVote = { userId: this.userId, vote: 'up' };
+      this.messageService.showMessage('Upvoted successfully.', true);
+      this.cdr.detectChanges();
     } catch (error) {
-      const errorMessage = "You have used your upvote";
-      this.messageService.showMessage(errorMessage, false);
       console.error('Failed to upvote', error);
+      this.messageService.showMessage('Failed to upvote.', false);
     }
   }
 
   async voteDown(answer: any): Promise<void> {
+    if (!answer.userVote || answer.userVote.vote !== 'up') {
+      this.messageService.showMessage('You have not upvoted this answer.', false);
+      return;
+    }
+
     try {
       await this.forumService.deleteVote(this.userId, answer.id);
-      // Reload answers to update the votes
-      await this.loadAnswers(this.roomData.id);
+      answer.votesLength -= 1;
+      answer.userVote = null;
+      this.messageService.showMessage('Downvoted successfully.', true);
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('Failed to downvote', error);
+      this.messageService.showMessage('Failed to downvote.', false);
     }
   }
 
-
-  
   async deleteAnswer(answerId: number): Promise<void> {
-    try {
-      await this.forumService.deleteAnswer(answerId);
-    } catch (error) {
-      console.error('Failed to delete answer', error);
+    const confirmation = confirm('Are you sure you want to delete this answer?');
+    if (confirmation) {
+      try {
+        await this.forumService.deleteAnswer(answerId);
+        this.messageService.showMessage('Answer deleted successfully.', true);
+        if (this.roomId) {
+          await this.loadRoomData(this.roomId);
+        }
+        this.cdr.detectChanges();
+      } catch (error) {
+        console.error('Failed to delete answer', error);
+        this.messageService.showMessage('Failed to delete answer.', false);
+      }
     }
   }
 }
