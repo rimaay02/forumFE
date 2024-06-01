@@ -1,5 +1,0 @@
-<!-- A container for displaying messages -->
-<dialog *ngIf="message" class="message-box" [ngClass]="{'success': isSuccess, 'error': !isSuccess}">
-    {{ message }}
-    <span class="close-icon" (click)="closeMessage()">&times;</span> <!-- Unicode 'times' character -->
-</dialog>

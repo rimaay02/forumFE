@@ -1,8 +1,0 @@
-<!--Navigation Bar-->
-<nav>
-  <ul>
-    <li><a routerLink="/forum" routerLinkActive="active">Forum</a></li>
-    <li *ngIf="!isLoggedIn"><a routerLink="/login" routerLinkActive="active">Join the Community</a></li>
-    <li *ngIf="isLoggedIn" (click)="logout()"><a>Logout</a></li>
-  </ul>
-</nav>
